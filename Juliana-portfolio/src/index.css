@@ -1,19 +1,19 @@
 @font-face {
   font-family: Barbara Calligraphy;
-  src: url('./assets/fonts/Barbara Calligraphy.ttf');
+  src: url("./assets/fonts/Barbara Calligraphy.ttf");
 }
 
-.logo-name{
+.logo-name {
   font-family: Barbara Calligraphy;
   font-weight: 400;
   font-size: 35px;
 }
 
-ul li{
+ul li {
   margin-left: 40px;
 }
 
-.hero-img-container .sub-heading{
+.hero-img-container .sub-heading {
   font-size: 65px;
   font-weight: 700;
 }
