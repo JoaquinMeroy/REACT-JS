@@ -13,7 +13,7 @@ function Header() {
         </div>
       </header>
 
-      <div className="flex flex-wrap">
+      {/* <div className="flex flex-wrap">
         <div className="w-full md:w-1/2 flex justify-center">
           <div className="hero-img-container">
             <img
@@ -28,6 +28,11 @@ function Header() {
             <h1 className="sub-heading">Capturing Life in Watercolor</h1>
           </div>
         </div>
+      </div> */}
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-10">
+        <div className=" bg-gray-400"></div>
+        <div className=" bg-gray-400"></div>
       </div>
     </div>
   );
