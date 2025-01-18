@@ -22,3 +22,21 @@ ul li {
   font-size: 65px;
   font-weight: 700;
 }
+
+.burger-menu{
+  display: none;
+}
+@media(max-width:425px){
+  .nav-buttons-container{
+    display: none;
+  } 
+
+  .logo-name{
+    text-align: center;
+    width: 100%;
+  }
+
+  .burger-menu{
+    display: block;
+  }
+}
