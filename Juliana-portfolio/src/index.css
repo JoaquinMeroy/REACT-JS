@@ -6,37 +6,3 @@
   font-family: Barbara Calligraphy;
   src: url("./assets/fonts/Barbara Calligraphy.ttf");
 }
-
-.logo-name,
-.sub-header-text {
-  font-family: Barbara Calligraphy;
-  font-weight: 400;
-  font-size: 35px;
-}
-
-ul li {
-  margin-left: 40px;
-}
-
-.hero-img-container .sub-heading {
-  font-size: 65px;
-  font-weight: 700;
-}
-
-.burger-menu{
-  display: none;
-}
-@media(max-width:425px){
-  .nav-buttons-container{
-    display: none;
-  } 
-
-  .logo-name{
-    text-align: center;
-    width: 100%;
-  }
-
-  .burger-menu{
-    display: block;
-  }
-}
