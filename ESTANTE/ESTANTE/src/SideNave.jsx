@@ -1,78 +1,50 @@
-  function SideNav() {
-    return (
-      <div className="flex h-screen flex-col justify-between border-e bg-white w-64">
-    <div className="px-4 py-6">
-      <span className="grid h-10 w-32 place-content-center rounded-lg text-xl text-gray-600">
-        ESTANTE
-      </span>
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai"; // Using react-icons
 
-      <ul className="mt-6 space-y-1">
-        <li>
-          <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            HOME
-          </label>
-        </li>
+function SideNav() {
+  const [isOpen, setIsOpen] = useState(true);
 
-        <li>
-          <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            OTC
-          </label>
-        </li>
+  return (
+    <div className={`h-screen flex flex-col justify-between border-e bg-white transition-all duration-300 ${isOpen ? "w-64" : "w-16"}`}>
+      {/* Top Section with Toggle Button */}
+      <div className="p-4 flex items-center justify-between">
+        <span className={`text-xl font-bold text-gray-600 transition-opacity ${isOpen ? "opacity-100" : "opacity-0 hidden"}`}>
+          ESTANTE
+        </span>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-gray-600 hover:text-black transition"
+        >
+          {isOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
+        </button>
+      </div>
 
-        <li>
-          <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            ZUELIG
-          </label>
-        </li>
-
-        <li>
-          <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            UNILAB
-          </label>
-        </li>
-
-        <li>
-          <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            METRO
-          </label>
-        </li>
-
-        <li>
-        <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            GENERICS
-          </label>
-        </li>
-
-        <li>
-        <label
-            href="#"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white"
-          >
-            BRANDED
-          </label>
-        </li>
+      {/* Navigation Links */}
+      <ul className="mt-4 space-y-1 flex-1 px-4">
+        {[
+          { name: "HOME", path: "/" },
+          { name: "OTC", path: "/otc" },
+          { name: "ZUELIG", path: "/zuelig" },
+          { name: "UNILAB", path: "/unilab" },
+          { name: "METRO", path: "/metro" },
+          { name: "GENERICS", path: "/generics" },
+          { name: "BRANDED", path: "/branded" },
+        ].map((item) => (
+          <li key={item.name}>
+            <Link
+              to={item.path}
+              className={`block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-blue-700 hover:text-white transition-all ${
+                isOpen ? "w-full" : "w-10 flex justify-center"
+              }`}
+            >
+              {isOpen ? item.name : item.name.charAt(0)}
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
-  </div>
-    );
-  }
+  );
+}
 
-  export default SideNav;
+export default SideNav;
