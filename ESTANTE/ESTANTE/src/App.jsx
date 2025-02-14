@@ -17,7 +17,7 @@ function App() {
 
   const getData = async () => {
     const docSnap = await getDoc(docRef);
-    console.log(docSnap);
+    console.log(docSnap.data());
   };
 
   useEffect(() => {
