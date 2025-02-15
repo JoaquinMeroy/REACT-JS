@@ -10,37 +10,48 @@ import GENERICS from "./GENERICS";
 import BRANDED from "./BRANDED";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase-config";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function App() {
-  const docRef = doc(db, "USERS", "SAfpMvZoRQh0oXBeT6UI");
+  const docRef = doc(db, "USER", "SAfpMvZoRQh0oXBeT6UI");
 
   const getData = async () => {
-    const docSnap = await getDoc(docRef);
-    console.log(docSnap.data());
+    try {
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        console.log("User Data:", docSnap.data());
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching document:", error);
+    }
   };
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
-    getData();
+    if (!hasFetched.current) {
+      getData();
+      hasFetched.current = true;
+    }
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen flex overflow-auto">
       <Router>
-        <div className="flex h-screen overflow-hidden">
-          <SideNav />
-          {/* Make sure the main content area does not overflow */}
-          <div className="flex-1 p-10 overflow-hidden">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/otc" element={<OTC />} />
-              <Route path="/zuelig" element={<ZUELIG />} />
-              <Route path="/unilab" element={<UNILAB />} />
-              <Route path="/metro" element={<METRO />} />
-              <Route path="/generics" element={<GENERICS />} />
-              <Route path="/branded" element={<BRANDED />} />
-            </Routes>
-          </div>
+        <SideNav />
+        {/* Ensure the content area scrolls if needed */}
+        <div className="flex-1 p-10 overflow-auto">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/otc" element={<OTC />} />
+            <Route path="/zuelig" element={<ZUELIG />} />
+            <Route path="/unilab" element={<UNILAB />} />
+            <Route path="/metro" element={<METRO />} />
+            <Route path="/generics" element={<GENERICS />} />
+            <Route path="/branded" element={<BRANDED />} />
+          </Routes>
         </div>
       </Router>
     </div>
