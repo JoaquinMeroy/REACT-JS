@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { FiEdit, FiTrash2, FiX } from "react-icons/fi"; // Import close icon
+import { FiEdit, FiTrash2, FiX } from "react-icons/fi"; 
+import { doc, updateDoc, arrayUnion, getDoc, arrayRemove } from "firebase/firestore";
+import { db } from "./firebase-config";
 
 function OTC() {
   const [selectedRow, setSelectedRow] = useState(null);
@@ -8,8 +10,13 @@ function OTC() {
   const [newBoxName, setNewBoxName] = useState("");
   const [rowToAdd, setRowToAdd] = useState(null);
   const [boxBeingEdited, setBoxBeingEdited] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null); // State to manage delete confirmation
-  const [dragging, setDragging] = useState(null); // Track the dragged box
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [dragging, setDragging] = useState(null);
+
+  // Add useEffect to fetch data on component mount
+  useEffect(() => {
+    fetchBoxes();
+  }, []);
 
   // Disable body scroll when a modal is active
   useEffect(() => {
@@ -17,16 +24,30 @@ function OTC() {
   }, [selectedRow]);
 
   // Add a new box to a row
-  const addNewBox = () => {
+  const addNewBox = async () => {
     if (rowToAdd !== null && newBoxName.trim()) {
-      setRows((prevRows) =>
-        prevRows.map((row, index) =>
-          index === rowToAdd ? [...row, newBoxName] : row
-        )
-      );
-      setNewBoxName("");
-      setShowAddModal(false);
-      setRowToAdd(null);
+      try {
+        const docRef = doc(db, "OTC", "Lf65VMqsGmqXyVacNpm7");
+  
+        // Update Firestore: Add new box to the correct row
+        await updateDoc(docRef, {
+          [`box.${rowToAdd}`]: arrayUnion(newBoxName),
+        });
+  
+        // Update local state for immediate UI update
+        setRows((prevRows) =>
+          prevRows.map((row, index) =>
+            index === rowToAdd ? [...row, newBoxName] : row
+          )
+        );
+  
+        // Reset modal states
+        setNewBoxName("");
+        setShowAddModal(false);
+        setRowToAdd(null);
+      } catch (error) {
+        console.error("Error adding box:", error);
+      }
     }
   };
 
@@ -37,14 +58,38 @@ function OTC() {
   };
 
   // Save edited box
-  const saveEditedBox = () => {
+  const saveEditedBox = async () => {
     if (boxBeingEdited) {
-      const { rowIndex, colIndex } = boxBeingEdited;
-      const updatedRows = [...rows];
-      updatedRows[rowIndex][colIndex] = newBoxName;
-      setRows(updatedRows);
-      setNewBoxName("");
-      setBoxBeingEdited(null);
+      try {
+        const { rowIndex, colIndex } = boxBeingEdited;
+        const docRef = doc(db, "OTC", "Lf65VMqsGmqXyVacNpm7");
+        
+        // Get the current data first
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const currentBoxes = data.box[rowIndex] || [];
+          
+          // Remove the old value and add the new one
+          const oldValue = currentBoxes[colIndex];
+          const newBoxes = [...currentBoxes];
+          newBoxes[colIndex] = newBoxName;
+          
+          // Update Firestore
+          await updateDoc(docRef, {
+            [`box.${rowIndex}`]: newBoxes
+          });
+          
+          // Update local state
+          const updatedRows = [...rows];
+          updatedRows[rowIndex][colIndex] = newBoxName;
+          setRows(updatedRows);
+          setNewBoxName("");
+          setBoxBeingEdited(null);
+        }
+      } catch (error) {
+        console.error("Error updating box:", error);
+      }
     }
   };
 
@@ -54,19 +99,42 @@ function OTC() {
   };
 
   // Confirm delete box
-  const confirmBoxDeletion = () => {
+  const confirmBoxDeletion = async () => {
     if (confirmDelete) {
-      const { rowIndex, colIndex } = confirmDelete;
-      const updatedRows = [...rows];
-      updatedRows[rowIndex].splice(colIndex, 1);
-      setRows(updatedRows);
-      setConfirmDelete(null); // Reset confirmation state
+      try {
+        const { rowIndex, colIndex } = confirmDelete;
+        const docRef = doc(db, "OTC", "Lf65VMqsGmqXyVacNpm7");
+        
+        // Get the current data first
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const currentBoxes = data.box[rowIndex] || [];
+          
+          // Remove the item at the specified index
+          const newBoxes = [...currentBoxes];
+          newBoxes.splice(colIndex, 1);
+          
+          // Update Firestore
+          await updateDoc(docRef, {
+            [`box.${rowIndex}`]: newBoxes
+          });
+          
+          // Update local state
+          const updatedRows = [...rows];
+          updatedRows[rowIndex].splice(colIndex, 1);
+          setRows(updatedRows);
+          setConfirmDelete(null);
+        }
+      } catch (error) {
+        console.error("Error deleting box:", error);
+      }
     }
   };
 
   // Cancel delete box
   const cancelDelete = () => {
-    setConfirmDelete(null); // Reset confirmation state
+    setConfirmDelete(null);
   };
 
   // Handle drag start event
@@ -90,7 +158,39 @@ function OTC() {
       // Add the dragged item to the new row
       updatedRows[targetRowIndex].splice(targetColIndex, 0, draggedItem);
       setRows(updatedRows);
-      setDragging(null); // Reset the dragging state
+      setDragging(null);
+    }
+  };
+
+  const fetchBoxes = async () => {
+    try {
+      const docRef = doc(db, "OTC", "Lf65VMqsGmqXyVacNpm7");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Firestore data:", data);
+        console.log("Box field:", data.box);
+  
+        // Extract the box values
+        const boxValues = data.box ? Object.values(data.box) : [];
+        
+        // Create a new array with 6 rows
+        const finalRows = Array.from({ length: 6 }, (_, index) => {
+          // If we have data for this row in boxValues, use it; otherwise use empty array
+          return boxValues[index] || [];
+        });
+  
+        console.log("Final rows:", finalRows);
+        setRows(finalRows);
+      } else {
+        console.warn("No such document!");
+        // If no document exists, initialize with 6 empty rows
+        setRows(Array.from({ length: 6 }, () => []));
+      }
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      // If there's an error, initialize with 6 empty rows
+      setRows(Array.from({ length: 6 }, () => []));
     }
   };
 
@@ -155,7 +255,7 @@ function OTC() {
           <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col gap-4 relative max-w-4xl">
             <button
               className="absolute top-2 right-2 text-gray-700"
-              onClick={() => setSelectedRow(null)} // Close the view when clicking the close button
+              onClick={() => setSelectedRow(null)}
             >
               <FiX size={24} />
             </button>
@@ -209,7 +309,7 @@ function OTC() {
           <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col gap-4 relative">
             <button
               className="absolute top-2 right-2 text-gray-700"
-              onClick={cancelDelete} // Cancel deletion
+              onClick={cancelDelete}
             >
               <FiX size={24} />
             </button>
